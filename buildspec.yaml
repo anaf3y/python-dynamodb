@@ -1,0 +1,22 @@
+version: 0.2
+env:
+  variables:
+    NAME: helloworld
+  parameter-store:
+    BUCKET: "LambdaS3Bucket"
+phases:
+    install:
+      runtime-versions:
+        python: 3.7
+      commands:
+        - echo "Install sam cli"
+        - pip install aws-sam-cli
+        - echo "Setup github auth"
+        - git config --global username "anaf3y"
+        - git config --global password "M0nk3yM@n123456"
+    build:
+      commands:
+        - echo "Build"
+        - sam build --template ./template.yaml --build-dir ./.aws-sam/build --debug
+        - sam package --template-file ./.aws-sam/build/template.yaml --output-template-file ./.aws-sam/build/packaged-template.yaml --s3-bucket $BUCKET
+        - sam deploy --template-file ./.aws-sam/build/packaged-template.yaml --stack-name $NAME --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM
